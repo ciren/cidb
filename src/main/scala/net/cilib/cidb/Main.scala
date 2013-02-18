@@ -2,7 +2,6 @@ package net.cilib.cidb
 
 import com.mongodb.casbah.Imports._
 import java.io._
-import net.liftweb.json.JsonParser._
 import scala.io.Source._
 import org.apache.commons.cli.{ParseException => ParseError, _}
 import Util._
@@ -37,7 +36,11 @@ object Main {
       if (!op("results") || !op("spec") || !op("jar")) exit("Option --submit must be used with --results, --jar and --spec", 1)
       if (op("search")) exit("Option --submit cannot be used with option --search", 1)
 
-      Submit.submit(opVal("spec"), opVal("results"), opVal("jar"), props)
+      try {
+        Submit.submit(opVal("spec"), opVal("results"), opVal("jar"), opVal("user"), props)
+      } catch {
+        case _ => exit("Error: Could not submit results!", 1)
+      }
     } else if (op("search")) {
       if (opLen != 1 + addOps) exit("Option --search must be used without any other options.", 1)
 

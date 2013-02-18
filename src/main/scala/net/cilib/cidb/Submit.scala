@@ -1,13 +1,15 @@
 package net.cilib.cidb
 
+import com.cedarsoftware.util.io._
 import com.mongodb.casbah.Imports._
+import com.mongodb.util.JSON
 import java.io._
 import java.net.URLClassLoader
-import java.util.ArrayList
-import java.util.Properties
-import net.liftweb.json.JsonParser._
-import Util._
+import java.util._
+import java.util.jar.JarFile
+import scala.collection.JavaConversions._
 import Tags._
+import Util._
 
 object Submit {
 
@@ -23,7 +25,12 @@ object Submit {
     sims.get(0)
   }
 
-  def submit(specFile: String, resultFile: String, jarFile: String, p: Properties) = {
+  def objectToJson(obj: Any) = {
+    def mustEdit(s: String) = s.contains(".") && s.substring(s.indexOf(".")+ 1).contains(".")
+    JSON.parse(JsonWriter.objectToJson(obj).split("\"") map {x => if (mustEdit(x)) x.substring(x.lastIndexOf(".") + 1) else x} mkString("\""))
+  }
+
+  def submit(specFile: String, resultFile: String, jarFile: String, user: String, p: Properties) = {
 
     val urlClassLoader = new URLClassLoader(Array(new File(jarFile).toURI().toURL()))
 
@@ -39,17 +46,23 @@ object Submit {
     val simulator = getSimulator(specFile, urlClassLoader)
     val simulation = createSimulationMethod.invoke(simulator)
 
+    val manifest = new JarFile(jarFile).getManifest
+    val version = "" // TODO: get cilib revision from manifest
+
     val data = MongoDBObject(
-      "algorithm" -> Encoder.toJson(getAlgorithmMethod.invoke(simulation)),
-      "measurements" -> Encoder.toJson(getMeasurementSuiteMethod.invoke(simulation)),
-      "problem" -> Encoder.toJson(getProblemMethod.invoke(simulation)),
+      "algorithm" -> objectToJson(getAlgorithmMethod.invoke(simulation)),
+      "measurements" -> objectToJson(getMeasurementSuiteMethod.invoke(simulation)),
+      "problem" -> objectToJson(getProblemMethod.invoke(simulation)),
       "samples" -> getSamplesMethod.invoke(simulator)
     )
 
     val simObject = MongoDBObject(
       "specification" -> readFile(specFile),
       "results" -> readFile(resultFile),
-      "data" -> data
+      "data" -> data,
+      "version" -> version,
+      "date" -> new Date(),
+      "user" -> user
     )
 
     val connection = connect(p)
