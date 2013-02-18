@@ -20,7 +20,7 @@ public class Search {
 
         DBCollection tagCol = db.getCollection(p.getProperty("db_tagCol"));
         DBCollection simCol = db.getCollection(p.getProperty("db_simCol"));
-        
+
         try {
             DBCursor cursor = simCol.find(buildQuery(searchString, tagCol));
 
@@ -36,17 +36,17 @@ public class Search {
     private static ArrayList<String> getPossibleKeys(String input, boolean hasNot, DBCollection collection) {
         DBCursor cursor = collection.find(new BasicDBObject("term", input));
         ArrayList<String> list = new ArrayList<String>();
-        
+
         while (cursor.hasNext()) {
             for (String key : (List<String>) cursor.next().get("keys")) {
                 if (!list.contains(key)) {
-                    if (!hasNot || (hasNot && key.contains(input + ".class"))) {
+                    if (!hasNot || (hasNot && key.contains(input + ".@type"))) {
                         list.add(key);
                     }
                 }
             }
         }
-        
+
         return list;
     }
 

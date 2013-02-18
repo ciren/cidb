@@ -3,13 +3,12 @@ package net.cilib.cidb
 import com.mongodb.casbah.Imports._
 import java.io._
 import java.util.Properties
-import net.liftweb.json.JsonParser._
 import scala.collection.mutable.HashMap
 import scala.io.Source._
 
 object Tags {
 
-  val REJECT = List("class")
+  val REJECT = List("@type")
 
   def updateTagsCollection(data: DBObject, connection: MongoConnection, p: Properties) = {
     var tmpTags = new HashMap[String,Set[String]]
