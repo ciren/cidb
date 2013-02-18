@@ -36,6 +36,7 @@ object Util {
     val results = new Opt("r", "results", true, "File containing the results of the simulation")
     val spec = new Opt("f", "spec", true, "File containing the specification of the simulation")
     val jar = new Opt("j", "jar", true, "Jar file used for the simulation")
+    val user = new Opt("u", "user", true, "User who uploaded the results")
     val config = new Opt("c", "config", true, "CIdb configuration file (default: \"cidb.conf\")")
 
     search.setArgName("search string")
@@ -43,6 +44,7 @@ object Util {
     spec.setArgName("specification file")
     config.setArgName("config file")
     jar.setArgName("jar file")
+    user.setArgName("user who uploaded the results")
 
     o.addOption(help);
     o.addOption(submit);
@@ -50,6 +52,7 @@ object Util {
     o.addOption(results);
     o.addOption(spec);
     o.addOption(jar);
+    o.addOption(user)
     o.addOption(config);
 
     o
